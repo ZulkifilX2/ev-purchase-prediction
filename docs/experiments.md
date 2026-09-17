@@ -475,17 +475,98 @@ Current best public leaderboard score:
 
 ---
 
-# Next Experiment
-
 ## EXP-004 — CatBoost + LightGBM Ensemble
 
-Planned tests:
+### Purpose
 
-* Probability averaging
-* Weighted probability blending
-* Rank averaging
-* OOF-based blend-weight comparison
+Test whether CatBoost and LightGBM make sufficiently different
+prediction errors for an ensemble to outperform both standalone models.
 
-The ensemble will be evaluated locally using saved out-of-fold predictions before any Kaggle submission is created.
+### Input Models
 
+CatBoost:
 
+- OOF ROC-AUC: **0.941711**
+- Public leaderboard: **0.941560**
+
+LightGBM:
+
+- OOF ROC-AUC: **0.941770**
+- Public leaderboard: **0.941650**
+
+### Prediction Correlation
+
+Correlation between CatBoost and LightGBM OOF predictions:
+
+**0.997437**
+
+The predictions are extremely similar, but not identical.
+
+### Probability Blend
+
+50% CatBoost + 50% LightGBM:
+
+**0.941906 OOF ROC-AUC**
+
+Best probability blend:
+
+- LightGBM weight: **0.55**
+- CatBoost weight: **0.45**
+- OOF ROC-AUC: **0.941907**
+
+### Rank Blend
+
+Predictions from each model were converted to percentile ranks before
+blending.
+
+Best rank blend:
+
+- LightGBM weight: **0.55**
+- CatBoost weight: **0.45**
+- OOF ROC-AUC: **0.941911**
+
+### Local Comparison
+
+- CatBoost: **0.941711**
+- LightGBM: **0.941770**
+- 50/50 probability blend: **0.941906**
+- Best probability blend: **0.941907**
+- Best rank blend: **0.941911**
+
+Improvement over best standalone model:
+
+**+0.000141 OOF ROC-AUC**
+
+### Kaggle Submission
+
+Submission:
+
+**submission_003_cat_lgb_rank_blend.csv**
+
+Method:
+
+**55% LightGBM + 45% CatBoost rank blend**
+
+Public leaderboard ROC-AUC:
+
+**0.941690**
+
+Previous best public leaderboard score:
+
+**0.941650**
+
+Public leaderboard improvement:
+
+**+0.000040**
+
+### Notes
+
+The ensemble improved both local OOF ROC-AUC and the public Kaggle
+leaderboard score.
+
+The public improvement was smaller than the local OOF improvement,
+but the direction of improvement transferred correctly.
+
+Despite a very high prediction correlation of approximately 0.9974,
+small differences between CatBoost and LightGBM predictions were
+still useful for ranking observations more accurately.
