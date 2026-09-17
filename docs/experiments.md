@@ -5,11 +5,11 @@
 **Kaggle Playground Series — Season 6 Episode 9**
 **Predicting Electric Vehicle Purchases**
 
-Evaluation Metric: **ROC-AUC**
+Evaluation metric: **ROC-AUC**
 
 ---
 
-## EXP-000 — Project Setup
+# EXP-000 — Project Setup
 
 **Status:** Complete
 
@@ -21,22 +21,21 @@ Evaluation Metric: **ROC-AUC**
 * Configured `.gitignore` to exclude:
 
   * Competition CSV files
-  * Python virtual environment
-  * Model files
-  * Submission files
-  * Out-of-fold prediction files
+  * Local virtual environment
+  * Model artifacts
+  * Submission CSV files
+  * OOF/test prediction files
 * Created an isolated Python 3.12 environment.
-* Installed the initial machine-learning stack.
-* Configured JupyterLab and the project kernel.
-* Created the initial project documentation.
+* Installed the machine-learning stack.
+* Configured JupyterLab and a project-specific kernel.
 
 ### Notes
 
-No models were trained during this experiment.
+No model training was performed during this experiment.
 
 ---
 
-## EXP-001 — Logistic Regression Baseline
+# EXP-001 — Logistic Regression Baseline
 
 ### Model
 
@@ -44,7 +43,7 @@ No models were trained during this experiment.
 
 ### Purpose
 
-Establish a simple, interpretable linear baseline before moving to nonlinear gradient-boosting models.
+Establish a simple interpretable baseline before testing nonlinear gradient-boosted models.
 
 ### Features
 
@@ -52,58 +51,33 @@ Establish a simple, interpretable linear baseline before moving to nonlinear gra
 * 6 categorical features
 * `id` excluded
 
-Numerical features:
-
-* `Age`
-* `Annual_Income_USD`
-* `Daily_Commute_km`
-* `Number_of_Cars_Owned`
-* `Charging_Stations_Near_Home`
-* `Charging_Stations_Near_Work`
-* `Environmental_Concern_Level`
-
-Categorical features:
-
-* `Gender`
-* `City_Type`
-* `Current_Car_Type`
-* `Home_Charging_Possible`
-* `Subsidy_Available`
-* `Range_Anxiety_Level`
-
 ### Preprocessing
 
-Numerical features:
+Numerical:
 
 * `StandardScaler`
 
-Categorical features:
+Categorical:
 
 * `OneHotEncoder`
 * `handle_unknown="ignore"`
 
-### Initial Validation Split
+### Single-Split Validation
 
 * 80% training
 * 20% validation
-* Stratified by target
+* Stratified target
 * `random_state=42`
 
-Single-split ROC-AUC:
+ROC-AUC:
 
 **0.937958**
 
-Constant-prediction ROC-AUC:
+Constant prediction baseline:
 
 **0.500000**
 
-### Cross-Validation
-
-Validation method:
-
-**Stratified 5-Fold Cross-Validation**
-
-Fold scores:
+### 5-Fold Cross-Validation
 
 * Fold 1: **0.936669**
 * Fold 2: **0.938045**
@@ -119,113 +93,44 @@ CV standard deviation:
 
 **0.000809**
 
-### Interpretation
-
-The strongest positive signals in the fitted Logistic Regression model were:
-
-* Environmental concern
-* Subsidy availability
-* Low range anxiety
-* Annual income
-
-Features with weak linear effects included:
-
-* Age
-* Number of cars owned
-* Charging-station counts
-
 ### Notes
 
-The Logistic Regression model established a strong linear baseline.
-
-Its stable 5-fold performance showed that the validation framework was working consistently.
-
-This experiment became the reference point for evaluating more powerful nonlinear models.
+This established a strong linear baseline and confirmed that the stratified validation framework was stable.
 
 ---
 
-## EXP-002 — CatBoost Baseline
+# EXP-002 — CatBoost Baseline
 
 ### Model
 
 `CatBoostClassifier`
-
-### Purpose
-
-Test whether a nonlinear gradient-boosting model with native categorical-feature handling could improve on the Logistic Regression baseline.
 
 ### Features
 
 * 7 numerical features
 * 6 categorical features
 * `id` excluded
-* Native CatBoost categorical-feature handling
+* Native categorical handling
 
-### Initial Single-Split Parameters
+### Main Parameters
 
-* `iterations=1000`
 * `learning_rate=0.05`
 * `depth=7`
-* `loss_function="Logloss"`
+* Maximum iterations: **2000**
 * `eval_metric="AUC"`
-* `random_seed=42`
-* `early_stopping_rounds=100`
+* Early stopping: **150 rounds**
 
-### Initial Single-Split Result
+### Single-Split Result
+
+ROC-AUC:
+
+**0.941434**
 
 Best iteration:
 
 **988**
 
-Validation ROC-AUC:
-
-**0.941434**
-
-This improved substantially over the Logistic Regression single-split score of **0.937958**.
-
-### Initial Feature Importance
-
-Most important CatBoost features:
-
-1. `Subsidy_Available`
-2. `Environmental_Concern_Level`
-3. `Annual_Income_USD`
-4. `Range_Anxiety_Level`
-5. `Age`
-
-Approximate feature importances from the single-split model:
-
-* Subsidy availability: **54.17**
-* Environmental concern: **19.00**
-* Annual income: **10.31**
-* Range anxiety: **4.10**
-* Age: **3.16**
-* Daily commute: **2.92**
-* Charging stations near home: **1.80**
-* Charging stations near work: **1.75**
-* Home charging possible: **0.95**
-* Number of cars owned: **0.72**
-* Current car type: **0.55**
-* City type: **0.37**
-* Gender: **0.18**
-
-### Cross-Validation Configuration
-
-Validation method:
-
-**Stratified 5-Fold Cross-Validation**
-
-Parameters:
-
-* Maximum iterations: **2000**
-* `learning_rate=0.05`
-* `depth=7`
-* `loss_function="Logloss"`
-* `eval_metric="AUC"`
-* `early_stopping_rounds=150`
-* Fold-specific random seeds
-
-### Fold Results
+### 5-Fold Results
 
 * Fold 1: **0.940559**
 * Fold 2: **0.941387**
@@ -233,7 +138,7 @@ Parameters:
 * Fold 4: **0.942211**
 * Fold 5: **0.941649**
 
-Mean Fold ROC-AUC:
+Mean fold ROC-AUC:
 
 **0.941716**
 
@@ -245,34 +150,15 @@ CV standard deviation:
 
 **0.000751**
 
-### Best Iterations
+Best iterations:
 
-* Fold 1: **1353**
-* Fold 2: **980**
-* Fold 3: **1370**
-* Fold 4: **914**
-* Fold 5: **1243**
-
-Average best iteration:
-
-**1172**
-
-### Saved Predictions
-
-Local-only files:
-
-* `outputs/predictions/catboost_oof.csv`
-* `outputs/predictions/catboost_test.csv`
-
-Submission file:
-
-* `outputs/submissions/submission_001_catboost_cv.csv`
-
-These files are excluded from GitHub.
+* 1353
+* 980
+* 1370
+* 914
+* 1243
 
 ### Kaggle Submission
-
-Submission:
 
 **submission_001_catboost_cv.csv**
 
@@ -280,84 +166,47 @@ Public leaderboard ROC-AUC:
 
 **0.941560**
 
-Local OOF ROC-AUC:
-
-**0.941711**
-
-CV-to-public-LB difference:
-
-**-0.000151**
-
 ### Notes
 
-CatBoost improved substantially over the Logistic Regression baseline.
-
-The small difference between local OOF performance and the public leaderboard suggests that the current cross-validation strategy is well aligned with the competition test distribution.
-
-CatBoost also demonstrated that nonlinear relationships and feature interactions provide useful predictive signal beyond the linear baseline.
+CatBoost substantially improved over Logistic Regression and established the first strong tree-based baseline.
 
 ---
 
-## EXP-003 — LightGBM Baseline
+# EXP-003 — LightGBM Baseline
 
 ### Model
 
 `LGBMClassifier`
 
-### Purpose
-
-Evaluate a second gradient-boosted decision-tree model and determine whether it could improve on CatBoost or provide complementary predictions for later ensembling.
-
 ### Features
 
-* 7 numerical features
-* 6 categorical features
+* Same 13 raw predictors
 * `id` excluded
-* Native LightGBM categorical-feature handling using pandas `category` dtype
+* Native categorical handling
 
-### Initial Single-Split Parameters
+### Parameters
 
-* `objective="binary"`
 * `n_estimators=3000`
 * `learning_rate=0.03`
 * `num_leaves=31`
-* `max_depth=-1`
 * `min_child_samples=50`
 * `subsample=0.9`
 * `colsample_bytree=0.9`
 * `reg_alpha=0.1`
 * `reg_lambda=1.0`
-* `random_state=42`
-* `n_jobs=-1`
-* Early stopping after 150 non-improving rounds
+* Early stopping: **150 rounds**
 
-### Initial Single-Split Result
+### Single-Split Result
+
+ROC-AUC:
+
+**0.941669**
 
 Best iteration:
 
 **979**
 
-Validation ROC-AUC:
-
-**0.941669**
-
-Single-split comparison:
-
-* Logistic Regression: **0.937958**
-* CatBoost: **0.941434**
-* LightGBM: **0.941669**
-
-LightGBM slightly outperformed CatBoost on the same validation split.
-
-### Cross-Validation Configuration
-
-Validation method:
-
-**Stratified 5-Fold Cross-Validation**
-
-Same base parameters as the single-split model, with fold-specific random seeds.
-
-### Fold Results
+### 5-Fold Results
 
 * Fold 1: **0.940614**
 * Fold 2: **0.941525**
@@ -365,7 +214,7 @@ Same base parameters as the single-split model, with fold-specific random seeds.
 * Fold 4: **0.942252**
 * Fold 5: **0.941670**
 
-Mean Fold ROC-AUC:
+Mean fold ROC-AUC:
 
 **0.941781**
 
@@ -377,46 +226,15 @@ CV standard deviation:
 
 **0.000748**
 
-### Best Iterations
+Best iterations:
 
-* Fold 1: **1292**
-* Fold 2: **1109**
-* Fold 3: **1160**
-* Fold 4: **767**
-* Fold 5: **977**
-
-### Comparison With CatBoost
-
-CatBoost OOF ROC-AUC:
-
-**0.941711**
-
-LightGBM OOF ROC-AUC:
-
-**0.941770**
-
-Local improvement over CatBoost:
-
-**+0.000059**
-
-The standalone difference is very small, but the two models may make different prediction errors and therefore remain useful for ensembling.
-
-### Saved Predictions
-
-Local-only files:
-
-* `outputs/predictions/lightgbm_oof.csv`
-* `outputs/predictions/lightgbm_test.csv`
-
-Submission file:
-
-* `outputs/submissions/submission_002_lightgbm_cv.csv`
-
-These files are excluded from GitHub.
+* 1292
+* 1109
+* 1160
+* 767
+* 977
 
 ### Kaggle Submission
-
-Submission:
 
 **submission_002_lightgbm_cv.csv**
 
@@ -424,149 +242,670 @@ Public leaderboard ROC-AUC:
 
 **0.941650**
 
-Local OOF ROC-AUC:
-
-**0.941770**
-
-CV-to-public-LB difference:
-
-**-0.000120**
-
-### Comparison With CatBoost on Kaggle
-
-CatBoost public leaderboard:
-
-**0.941560**
-
-LightGBM public leaderboard:
-
-**0.941650**
-
-Public leaderboard improvement:
-
-**+0.000090**
-
 ### Notes
 
-LightGBM produced the strongest standalone result so far.
-
-Its local OOF result and public leaderboard result were again extremely close, reinforcing confidence in the current validation framework.
-
-Because CatBoost and LightGBM have nearly identical standalone performance but different model structures, their prediction diversity should be tested through probability and rank-based ensembling.
+LightGBM slightly outperformed CatBoost and became the strongest standalone raw-feature model at this stage.
 
 ---
 
-# Current Model Leaderboard
-
-| Model               | Local OOF / CV ROC-AUC | Public Kaggle ROC-AUC |
-| ------------------- | ---------------------: | --------------------: |
-| Constant baseline   |               0.500000 |                     — |
-| Logistic Regression |               0.938096 |                     — |
-| CatBoost            |               0.941711 |              0.941560 |
-| LightGBM            |           **0.941770** |          **0.941650** |
-
-Current best standalone model:
-
-**LightGBM**
-
-Current best public leaderboard score:
-
-**0.941650**
-
----
-
-## EXP-004 — CatBoost + LightGBM Ensemble
-
-### Purpose
-
-Test whether CatBoost and LightGBM make sufficiently different
-prediction errors for an ensemble to outperform both standalone models.
-
-### Input Models
-
-CatBoost:
-
-- OOF ROC-AUC: **0.941711**
-- Public leaderboard: **0.941560**
-
-LightGBM:
-
-- OOF ROC-AUC: **0.941770**
-- Public leaderboard: **0.941650**
+# EXP-004 — CatBoost + LightGBM Ensemble
 
 ### Prediction Correlation
 
-Correlation between CatBoost and LightGBM OOF predictions:
+CatBoost ↔ LightGBM:
 
 **0.997437**
 
-The predictions are extremely similar, but not identical.
+### Best Probability Blend
 
-### Probability Blend
+* LightGBM: **55%**
+* CatBoost: **45%**
 
-50% CatBoost + 50% LightGBM:
+OOF ROC-AUC:
 
-**0.941906 OOF ROC-AUC**
+**0.941907**
 
-Best probability blend:
+### Best Rank Blend
 
-- LightGBM weight: **0.55**
-- CatBoost weight: **0.45**
-- OOF ROC-AUC: **0.941907**
+* LightGBM: **55%**
+* CatBoost: **45%**
 
-### Rank Blend
+OOF ROC-AUC:
 
-Predictions from each model were converted to percentile ranks before
-blending.
-
-Best rank blend:
-
-- LightGBM weight: **0.55**
-- CatBoost weight: **0.45**
-- OOF ROC-AUC: **0.941911**
-
-### Local Comparison
-
-- CatBoost: **0.941711**
-- LightGBM: **0.941770**
-- 50/50 probability blend: **0.941906**
-- Best probability blend: **0.941907**
-- Best rank blend: **0.941911**
-
-Improvement over best standalone model:
-
-**+0.000141 OOF ROC-AUC**
+**0.941911**
 
 ### Kaggle Submission
 
-Submission:
-
 **submission_003_cat_lgb_rank_blend.csv**
-
-Method:
-
-**55% LightGBM + 45% CatBoost rank blend**
 
 Public leaderboard ROC-AUC:
 
 **0.941690**
 
-Previous best public leaderboard score:
+### Notes
 
-**0.941650**
+Despite extremely high prediction correlation, rank averaging produced a small but repeatable improvement.
 
-Public leaderboard improvement:
+---
 
-**+0.000040**
+# EXP-005 — XGBoost Baseline
+
+### Model
+
+`XGBClassifier`
+
+### Features
+
+* 13 raw predictors
+* `id` excluded
+* Native categorical handling
+
+### Parameters
+
+* `n_estimators=3000`
+* `learning_rate=0.03`
+* `max_depth=6`
+* `min_child_weight=5`
+* `subsample=0.9`
+* `colsample_bytree=0.9`
+* `reg_alpha=0.1`
+* `reg_lambda=1.0`
+* `tree_method="hist"`
+* `enable_categorical=True`
+* Early stopping: **150 rounds**
+
+### Single-Split Result
+
+ROC-AUC:
+
+**0.941672**
+
+Best iteration:
+
+**879**
+
+### 5-Fold Results
+
+* Fold 1: **0.940641**
+* Fold 2: **0.941580**
+* Fold 3: **0.942841**
+* Fold 4: **0.942434**
+* Fold 5: **0.941832**
+
+Mean fold ROC-AUC:
+
+**0.941866**
+
+OOF ROC-AUC:
+
+**0.941857**
+
+CV standard deviation:
+
+**0.000756**
+
+Best iterations:
+
+* 1020
+* 760
+* 808
+* 763
+* 855
+
+### Prediction Correlations
+
+* CatBoost ↔ LightGBM: **0.997437**
+* CatBoost ↔ XGBoost: **0.997973**
+* LightGBM ↔ XGBoost: **0.997616**
 
 ### Notes
 
-The ensemble improved both local OOF ROC-AUC and the public Kaggle
-leaderboard score.
+XGBoost became the strongest standalone raw-feature model, although all three tree models remained highly correlated.
 
-The public improvement was smaller than the local OOF improvement,
-but the direction of improvement transferred correctly.
+---
 
-Despite a very high prediction correlation of approximately 0.9974,
-small differences between CatBoost and LightGBM predictions were
-still useful for ranking observations more accurately.
+# EXP-006 — Three-Model Rank Ensemble
+
+### Models
+
+* CatBoost
+* LightGBM
+* XGBoost
+
+### Equal Rank Blend
+
+OOF ROC-AUC:
+
+**0.941982**
+
+### Best Coarse Weight Search
+
+* CatBoost: **20%**
+* LightGBM: **35%**
+* XGBoost: **45%**
+
+OOF ROC-AUC:
+
+**0.941988**
+
+### Kaggle Submission
+
+**submission_004_three_model_rank_blend.csv**
+
+Public leaderboard ROC-AUC:
+
+**0.941710**
+
+### Notes
+
+The third model improved OOF performance but added only a very small public leaderboard improvement.
+
+The raw-feature boosting models appeared to be approaching a performance ceiling.
+
+---
+
+# EXP-007 — Manual Feature Engineering
+
+### Purpose
+
+Change the feature representation instead of continuing to add similar boosting models.
+
+### Added Features
+
+Numerical interactions:
+
+* `Income_per_Car`
+* `Total_Charging_Stations`
+* `Charging_Station_Difference`
+* `Income_x_Concern`
+* `Commute_x_Concern`
+
+Categorical interactions:
+
+* `Subsidy_x_Concern`
+* `Subsidy_x_Anxiety`
+* `Concern_x_Anxiety`
+* `Income_x_Subsidy`
+* `HomeCharge_x_Subsidy`
+* `HomeCharge_x_Commute`
+
+### Single-Split Result
+
+Raw LightGBM:
+
+**0.941669**
+
+Feature-engineered LightGBM:
+
+**0.941785**
+
+Gain:
+
+**+0.000116**
+
+Best iteration:
+
+**972**
+
+### 5-Fold Results
+
+* Fold 1: **0.940593**
+* Fold 2: **0.941624**
+* Fold 3: **0.942960**
+* Fold 4: **0.942345**
+* Fold 5: **0.941878**
+
+Mean fold ROC-AUC:
+
+**0.941880**
+
+OOF ROC-AUC:
+
+**0.941871**
+
+CV standard deviation:
+
+**0.000788**
+
+Best iterations:
+
+* 1001
+* 1005
+* 1187
+* 981
+* 945
+
+### Ensemble Test
+
+Replacing raw LightGBM with feature-engineered LightGBM produced:
+
+**0.942046 OOF ROC-AUC**
+
+Best composition:
+
+* CatBoost: **20%**
+* Feature-engineered LightGBM: **35%**
+* XGBoost: **45%**
+
+### Notes
+
+Manual feature engineering produced a real but relatively small improvement.
+
+---
+
+# EXP-008 — Leak-Free Target Encoding
+
+### Purpose
+
+Test whether target-derived statistics for low-cardinality categorical combinations could improve the feature-engineered LightGBM.
+
+### Method
+
+Target encoding used:
+
+* Inner 5-fold OOF encoding for training rows
+* Training-fold-only mappings for validation rows
+* Smoothed group means
+* No validation target leakage
+
+### Encoded Groups
+
+Included:
+
+* Subsidy
+* Environmental concern
+* Range anxiety
+* Home charging
+* City
+* Car type
+* Subsidy × concern
+* Subsidy × anxiety
+* Concern × anxiety
+* Income band × subsidy
+* Income band × concern
+* Home charging × subsidy
+
+### Result
+
+Raw LightGBM:
+
+**0.941669**
+
+Feature Engineering:
+
+**0.941785**
+
+Feature Engineering + Target Encoding:
+
+**0.941771**
+
+Gain versus FE:
+
+**-0.000014**
+
+Best iteration:
+
+**998**
+
+### Decision
+
+**Rejected**
+
+### Notes
+
+Low-cardinality categorical target encoding did not improve over feature engineering alone.
+
+LightGBM was already able to learn most of this structure directly.
+
+---
+
+# EXP-009 — Original Dataset Investigation
+
+### Dataset
+
+Original EV Adoption Behavior and Range Anxiety dataset.
+
+Rows:
+
+**10,000**
+
+Predictor schema:
+
+**Exact match with the 13 competition predictors**
+
+### Target Distribution
+
+Original positive rate:
+
+**0.175000**
+
+Competition positive rate:
+
+**0.174645**
+
+### Distribution Differences
+
+The original dataset was related to, but not identical to, the competition distribution.
+
+Examples:
+
+* Competition mean commute: approximately **32.16 km**
+
+* Original mean commute: approximately **41.11 km**
+
+* Competition cars owned mean: approximately **1.71**
+
+* Original mean: approximately **1.86**
+
+The original dataset also contained missing numerical values.
+
+### EXP-009A — Direct Row Augmentation
+
+Competition training fold:
+
+**534,932 rows**
+
+Original data added:
+
+**10,000 rows**
+
+Augmented training size:
+
+**544,932 rows**
+
+Validation remained entirely competition data.
+
+Result:
+
+**0.941698**
+
+Feature-engineered baseline:
+
+**0.941785**
+
+Difference:
+
+**-0.000087**
+
+### Decision
+
+Direct augmentation rejected.
+
+---
+
+### EXP-009B — Original-Data Source Score
+
+A Logistic Regression model was trained only on the original dataset using:
+
+* Annual income
+* Environmental concern
+* Subsidy availability
+* Range anxiety
+
+Original-only model evaluated on competition validation:
+
+**0.937515**
+
+The source model's decision score was then added to the feature-engineered LightGBM.
+
+Result:
+
+**0.941722**
+
+Difference versus FE baseline:
+
+**-0.000063**
+
+### Decision
+
+Source-score transfer rejected.
+
+### Notes
+
+The source dataset is related to the competition generator, but direct domain transfer did not improve the competition model.
+
+---
+
+# EXP-010 — Synthetic Income Artifacts
+
+### Purpose
+
+Investigate whether repeated numerical values in the synthetic competition dataset contain generator-specific predictive signal.
+
+Annual income was selected because the training set contains approximately 668k rows but only around 13k unique income values.
+
+### Income Artifact Features
+
+Target-encoded:
+
+* Exact income
+* Income floored to $50
+* Income floored to $250
+* Income floored to $500
+
+Frequency-encoded:
+
+* Exact income
+* $50 income bin
+* $250 income bin
+* $500 income bin
+
+Target encodings were produced leak-free using inner OOF folds.
+
+### Single-Split Result
+
+Feature Engineering only:
+
+**0.941785**
+
+Feature Engineering + Income Artifacts:
+
+**0.945266**
+
+Gain:
+
+**+0.003481**
+
+Best iteration:
+
+**847**
+
+### Artifact Feature Importance
+
+Strong synthetic-artifact features included:
+
+* `TE_Income_Exact`
+* `TE_Income_Floor_50`
+* `FREQ_Income_Exact`
+* `FREQ_Income_Floor_50`
+* `TE_Income_Floor_500`
+* `TE_Income_Floor_250`
+* `FREQ_Income_Floor_500`
+* `FREQ_Income_Floor_250`
+
+### 5-Fold Nested Validation
+
+Each outer fold generated artifact target encodings using only that fold's training portion.
+
+Fold results:
+
+* Fold 1: **0.944590**
+* Fold 2: **0.945256**
+* Fold 3: **0.946335**
+* Fold 4: **0.945939**
+* Fold 5: **0.945468**
+
+Mean fold ROC-AUC:
+
+**0.945518**
+
+OOF ROC-AUC:
+
+**0.945511**
+
+CV standard deviation:
+
+**0.000596**
+
+Best iterations:
+
+* 842
+* 858
+* 938
+* 649
+* 783
+
+### Prediction Correlation
+
+Artifact LightGBM correlations:
+
+* With CatBoost: **0.979795**
+* With XGBoost: **0.980184**
+* With FE-LightGBM: **0.981238**
+
+This was substantially lower than the approximately 0.997 correlations among the raw-feature models.
+
+### Ensemble Tests
+
+Artifact model alone:
+
+**0.945511**
+
+90% Artifact + 10% previous ensemble:
+
+**0.945539**
+
+90% Artifact + 10% XGBoost:
+
+**0.945544**
+
+The additional ensemble gain was very small.
+
+### Kaggle Submission
+
+**submission_005_income_artifact_lgbm.csv**
+
+Description:
+
+`Income artifact LightGBM | exact + 50/250/500 income TE/frequency | 5-fold OOF 0.945511`
+
+Public leaderboard ROC-AUC:
+
+**0.945800**
+
+Previous best public leaderboard:
+
+**0.941710**
+
+Public leaderboard improvement:
+
+**+0.004090**
+
+### Notes
+
+This was the largest improvement of the project so far.
+
+Synthetic numerical repetition contained significantly more useful predictive structure than ordinary feature interactions, model tuning, low-cardinality target encoding, or source-data augmentation.
+
+The artifact model became the new primary modeling approach.
+
+---
+
+# EXP-011 — Income + Commute Artifact Probe
+
+**Status:** Single-split probe only — full 5-fold validation pending.
+
+### Added Commute Features
+
+Target encodings:
+
+* Exact 0.1 km commute value
+* Commute floored to 1 km
+* Commute floored to 5 km
+* Commute floored to 10 km
+
+Frequency encodings:
+
+* Exact commute
+* 1 km bin
+* 5 km bin
+* 10 km bin
+
+### Single-Split Comparison
+
+Income artifacts V1:
+
+**0.945266**
+
+Income + commute V2:
+
+**0.945390**
+
+Gain:
+
+**+0.000124**
+
+Best iteration:
+
+**881**
+
+### Commute Feature Usage
+
+Strong commute-related features included:
+
+* `TE_Commute_Exact`
+* `TE_Commute_Floor_1`
+* `FREQ_Commute_Exact`
+* `TE_Commute_Floor_5`
+* `FREQ_Commute_Floor_1`
+
+### Decision
+
+Promising enough for full 5-fold validation.
+
+No Kaggle submission has been created from V2 yet.
+
+---
+
+# Current Model Leaderboard
+
+| Model                     | Local OOF / CV ROC-AUC | Public Kaggle ROC-AUC |
+| ------------------------- | ---------------------: | --------------------: |
+| Constant baseline         |               0.500000 |                     — |
+| Logistic Regression       |               0.938096 |                     — |
+| CatBoost                  |               0.941711 |              0.941560 |
+| LightGBM                  |               0.941770 |              0.941650 |
+| XGBoost                   |               0.941857 |                     — |
+| CatBoost + LightGBM Rank  |               0.941911 |              0.941690 |
+| Three-Model Rank Ensemble |               0.941988 |              0.941710 |
+| FE Three-Model Ensemble   |               0.942046 |                     — |
+| Income-Artifact LightGBM  |           **0.945511** |          **0.945800** |
+
+## Current Best Local Result
+
+**0.945511 OOF ROC-AUC**
+
+## Current Best Public Leaderboard Result
+
+**0.945800 ROC-AUC**
+
+---
+
+# Next Experiment
+
+## Income + Commute Artifact V2 — Full 5-Fold Validation
+
+The next session will validate the promising single-split improvement from:
+
+**0.945266 → 0.945390**
+
+using the same nested 5-fold methodology used for the income-artifact model.
+
+If V2 improves full OOF performance, additional synthetic artifacts may then be tested individually for:
+
+* Age
+* Charging-station counts
+* Environmental concern
+* Number of cars owned
+
+Only features that improve leak-free cross-validation will be retained.
