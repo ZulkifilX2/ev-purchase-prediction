@@ -26,3 +26,6 @@ __pycache__/
 .DS_Store
 Thumbs.db
 .vscode/
+
+# Model predictions / OOF files
+outputs/predictions/*
