@@ -55,6 +55,15 @@ Mean CV AUC:
 CV Standard Deviation:
 0.000809
 
+Average Best Iteration:
+1172
+
+Public Leaderboard:
+0.941560
+
+CV-to-LB Difference:
+-0.000151
+
 Notes:
 Established an interpretable linear baseline before gradient boosting.
 Strongest signals were environmental concern, subsidy availability,
